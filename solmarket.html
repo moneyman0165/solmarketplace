@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>SOLMARKET.EXE</title>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    html, body, #root { margin: 0; padding: 0; min-height: 100%; background: #000; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+const TICKER_ITEMS = [
+“🚀 $JUPITER +340%”, “💀 STAY POOR OR BUY”, “🐀 WEN MOON”, “⚡ SOLANA ONLY”,
+“🟢 CMC LISTING OPEN”, “💎 WAGMI”, “🔥 FULL STACK OR NOTHING”, “👻 PHANTOM ACCEPTED”,
+“📈 LIQUIDITY NOW”, “🤝 NO FORMS. NO WAITING.”, “💸 USDC OR SOL”, “🦀 DEX REACTIONS LIVE”,
+“🎯 JUPITER VERIFIED”, “🌕 MOON SOON”, “⚔️ DEGEN APPROVED”, “🧠 NGMI IF YOU SKIP THIS”,
+];
+
+const BUNDLES = [
+{
+id: “starter”, tier: “TIER I”, name: “STARTER.EXE”, sub: “VISIBILITY / VERIFY / DISCOVERY”,
+price: 500, tag: “FOR NORMIES”, tagColor: “#FFE600”,
+features: [“CMC + COINGECKO SUPPORT”, “JUPITER VERIFY”, “DEX REACTIONS”],
+cta: “ADD TO BAG”, highlight: false, emoji: “🌱”,
+},
+{
+id: “fullstack”, tier: “TIER Ω”, name: “FULL.STACK”, sub: “INFRA / MARKET / SCALE”,
+price: 2500, tag: “⭐ DEGEN APPROVED”, tagColor: “#00FF41”,
+features: [“TRADING TERMINAL ACCESS”, “CMC + CG + MEXC + BITGET”, “LIQUIDITY + VOLUME”, “SOCIAL TRACTION”, “COMMUNITY MOD 2WK”, “JUPITER VERIFY”, “DEX VISIBILITY”],
+cta: “GO FULL STACK”, highlight: true, emoji: “☠️”,
+},
+{
+id: “growth”, tier: “TIER II”, name: “GROWTH.SH”, sub: “LIQUIDITY / COMMUNITY / MOMENTUM”,
+price: 1200, tag: “MID CURVE”, tagColor: “#FF6B35”,
+features: [“LIQUIDITY + VOLUME”, “SOCIAL BOOST (X)”, “COMMUNITY MOD 1WK”],
+cta: “ADD TO BAG”, highlight: false, emoji: “📈”,
+},
+];
+
+const SERVICES = [
+{ id: “jupiter”, icon: “◈”, name: “JUPITER.VERIFY”, price: 150, tag: “HOT” },
+{ id: “liquidity”, icon: “◉”, name: “LIQUIDITY.BOOST”, price: 800, tag: “POWER” },
+{ id: “social”, icon: “▲”, name: “SOCIAL.TRACTION”, price: 300, tag: “VIRAL” },
+{ id: “moderation”, icon: “◫”, name: “COMMUNITY.MOD”, price: 150, tag: “WEEKLY” },
+{ id: “dex”, icon: “◬”, name: “DEX.REACTIONS”, price: 120, tag: “LIVE” },
+{ id: “terminal”, icon: “▣”, name: “TRADING.TERMINAL”, price: 1000, tag: “PRO” },
+];
+
+// ── GLITCH TEXT ──────────────────────────────────────────────────────────────
+function GlitchText({ children, size = “inherit”, color = “#00FF41” }) {
+const [glitching, setGlitching] = useState(false);
+useEffect(() => {
+const interval = setInterval(() => {
+setGlitching(true);
+setTimeout(() => setGlitching(false), 120);
+}, 3000 + Math.random() * 4000);
+return () => clearInterval(interval);
+}, []);
+return (
+<span style={{ position: “relative”, display: “inline-block”, color, fontSize: size }}>
+{children}
+{glitching && (
+<>
+<span style={{
+position: “absolute”, top: 0, left: 0, color: “#FF2E63”, clipPath: “inset(20% 0 60% 0)”,
+transform: “translate(-2px, 1px)”, opacity: 0.8, pointerEvents: “none”,
+}}>{children}</span>
+<span style={{
+position: “absolute”, top: 0, left: 0, color: “#00FFFF”, clipPath: “inset(60% 0 10% 0)”,
+transform: “translate(2px, -1px)”, opacity: 0.8, pointerEvents: “none”,
+}}>{children}</span>
+</>
+)}
+</span>
+);
+}
+
+// ── BLINKING CURSOR ──────────────────────────────────────────────────────────
+function Cursor() {
+return <span style={{ animation: “blink 1s step-end infinite”, color: “#00FF41” }}>█</span>;
+}
+
+// ── LIVE COUNTER ─────────────────────────────────────────────────────────────
+function LiveCounter({ value }) {
+const [display, setDisplay] = useState(value);
+useEffect(() => {
+const t = setInterval(() => {
+setDisplay(v => v + Math.floor(Math.random() * 3));
+}, 8000);
+return () => clearInterval(t);
+}, []);
+return <span>{display.toLocaleString()}</span>;
+}
+
+// ── TICKER ───────────────────────────────────────────────────────────────────
+function Ticker() {
+const items = […TICKER_ITEMS, …TICKER_ITEMS];
+return (
+<div style={{
+background: “#00FF41”, color: “#000”, overflow: “hidden”,
+height: “28px”, display: “flex”, alignItems: “center”, borderBottom: “2px solid #00FF41”,
+}}>
+<div style={{ display: “flex”, animation: “tickerScroll 40s linear infinite”, whiteSpace: “nowrap” }}>
+{items.map((item, i) => (
+<span key={i} style={{ padding: “0 2rem”, fontFamily: “var(–mono)”, fontSize: “0.72rem”, fontWeight: 600, flexShrink: 0 }}>
+{item}
+</span>
+))}
+</div>
+</div>
+);
+}
+
+// ── MATRIX RAIN CANVAS ───────────────────────────────────────────────────────
+function MatrixRain() {
+const canvasRef = useRef(null);
+useEffect(() => {
+const canvas = canvasRef.current;
+if (!canvas) return;
+const ctx = canvas.getContext(“2d”);
+canvas.width = canvas.offsetWidth;
+canvas.height = canvas.offsetHeight;
+const cols = Math.floor(canvas.width / 16);
+const drops = Array(cols).fill(1);
+const chars = “SOLANAVERIFYLISTLIQUIDITYMOONDEGENWAGMIJUPITERVOLUMEBOOSTPUMPFUN01”;
+const draw = () => {
+ctx.fillStyle = “rgba(0,0,0,0.06)”;
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+ctx.fillStyle = “#00FF41”;
+ctx.font = “12px monospace”;
+drops.forEach((y, i) => {
+const char = chars[Math.floor(Math.random() * chars.length)];
+ctx.globalAlpha = Math.random() * 0.5 + 0.1;
+ctx.fillText(char, i * 16, y * 16);
+if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+drops[i]++;
+});
+ctx.globalAlpha = 1;
+};
+const timer = setInterval(draw, 50);
+return () => clearInterval(timer);
+}, []);
+return <canvas ref={canvasRef} style={{ position: “absolute”, inset: 0, width: “100%”, height: “100%”, opacity: 0.15, pointerEvents: “none” }} />;
+}
+
+// ── DEVICE DETECTION ─────────────────────────────────────────────────────────
+function isMobile() {
+return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+}
+
+function getMobileDeepLink(walletName) {
+const currentUrl = encodeURIComponent(window.location.href);
+if (walletName === “Phantom”)  return `https://phantom.app/ul/browse/${currentUrl}?ref=${currentUrl}`;
+if (walletName === “Solflare”) return `https://solflare.com/ul/v1/browse/${currentUrl}?ref=${currentUrl}`;
+return null;
+}
+
+// ── WALLET HOOK ───────────────────────────────────────────────────────────────
+function useWallet() {
+const [wallet, setWallet] = useState({ status: “idle”, address: null, name: null, errorMsg: null });
+
+// Eager re-connect (works when already inside wallet browser)
+useEffect(() => {
+const provider = window.solana || window.solflare;
+if (provider?.isConnected && provider?.publicKey) {
+setWallet({
+status: “connected”,
+address: provider.publicKey.toString(),
+name: window.solana?.isPhantom ? “Phantom” : “Solflare”,
+errorMsg: null,
+});
+}
+}, []);
+
+// Handle return from wallet browser deep link
+useEffect(() => {
+const pending = sessionStorage.getItem(“pendingWallet”);
+if (!pending) return;
+sessionStorage.removeItem(“pendingWallet”);
+const provider = window.solana || window.solflare;
+if (!provider) return;
+setWallet(w => ({ …w, status: “connecting”, name: pending }));
+provider.connect().then(resp => {
+const address = resp.publicKey?.toString() || provider.publicKey?.toString();
+setWallet({ status: “connected”, address, name: pending, errorMsg: null });
+provider.on?.(“disconnect”, () => setWallet({ status: “idle”, address: null, name: null, errorMsg: null }));
+}).catch(err => {
+setWallet({ status: “error”, address: null, name: pending, errorMsg: err.message || “Failed” });
+});
+}, []);
+
+const connect = async (walletName) => {
+// MOBILE: redirect into wallet app browser
+if (isMobile()) {
+const deepLink = getMobileDeepLink(walletName);
+if (deepLink) {
+sessionStorage.setItem(“pendingWallet”, walletName);
+window.location.href = deepLink;
+return;
+}
+}
+// DESKTOP: injected provider
+setWallet(w => ({ …w, status: “connecting”, name: walletName }));
+try {
+let provider;
+if (walletName === “Phantom”) {
+if (!window.solana?.isPhantom) {
+window.open(“https://phantom.app/”, “_blank”);
+setWallet({ status: “error”, address: null, name: walletName, errorMsg: “Phantom not installed — opening install page” });
+return;
+}
+provider = window.solana;
+} else if (walletName === “Solflare”) {
+if (!window.solflare?.isSolflare) {
+window.open(“https://solflare.com/”, “_blank”);
+setWallet({ status: “error”, address: null, name: walletName, errorMsg: “Solflare not installed — opening install page” });
+return;
+}
+provider = window.solflare;
+} else { throw new Error(“Unsupported wallet”); }
+
+```
+  const resp = await provider.connect();
+  const address = resp.publicKey?.toString() || provider.publicKey?.toString();
+  setWallet({ status: "connected", address, name: walletName, errorMsg: null });
+  provider.on?.("disconnect", () => setWallet({ status: "idle", address: null, name: null, errorMsg: null }));
+} catch (err) {
+  const rejected = err.code === 4001 || /rejected|cancelled/i.test(err.message || "");
+  setWallet({ status: rejected ? "rejected" : "error", address: null, name: walletName,
+    errorMsg: rejected ? "Connection rejected by user" : (err.message || "Connection failed") });
+}
+```
+
+};
+
+const disconnect = () => {
+try {
+if (wallet.name === “Phantom”) window.solana?.disconnect();
+if (wallet.name === “Solflare”) window.solflare?.disconnect();
+} catch (_) {}
+setWallet({ status: “idle”, address: null, name: null, errorMsg: null });
+};
+
+const shortAddr = wallet.address ? `${wallet.address.slice(0,4)}···${wallet.address.slice(-4)}` : null;
+return { wallet, connect, disconnect, shortAddr, isConnected: wallet.status === “connected” };
+}
+
+// ── WALLET MODAL ─────────────────────────────────────────────────────────────
+function WalletModal({ onSelect, onClose, status, errorMsg, connecting }) {
+const mobile = isMobile();
+const WALLETS = [
+{ name: “Phantom”,  emoji: “👻”, color: “#AB9FF2”, hint: mobile ? “Opens in Phantom app” : “Browser extension” },
+{ name: “Solflare”, emoji: “☀️”, color: “#FC9834”, hint: mobile ? “Opens in Solflare app” : “Browser extension” },
+];
+return (
+<div style={{
+position: “fixed”, inset: 0, background: “rgba(0,0,0,0.92)”, zIndex: 500,
+display: “flex”, alignItems: mobile ? “flex-end” : “center”, justifyContent: “center”,
+}} onClick={onClose}>
+<div style={{
+background: “#040804”, border: “1px solid #00FF41”, width: “100%”, maxWidth: 440,
+boxShadow: “0 0 60px rgba(0,255,65,0.25)”,
+borderRadius: mobile ? “12px 12px 0 0” : 0,
+}} onClick={e => e.stopPropagation()}>
+{mobile && (
+<div style={{ display: “flex”, justifyContent: “center”, padding: “0.75rem 0 0.25rem” }}>
+<div style={{ width: 40, height: 4, background: “rgba(0,255,65,0.3)”, borderRadius: 2 }} />
+</div>
+)}
+<div style={{ padding: “0.85rem 1.25rem”, borderBottom: “1px solid rgba(0,255,65,0.2)”,
+display: “flex”, alignItems: “center”, justifyContent: “space-between”, background: “#080F08” }}>
+<span style={{ fontFamily: “‘Press Start 2P’, monospace”, fontSize: “0.55rem”, color: “#00FF41” }}>CONNECT_WALLET()</span>
+<button onClick={onClose} style={{
+background: “transparent”, border: “1px solid rgba(0,255,65,0.3)”, color: “#00B32C”,
+width: 32, height: 32, cursor: “pointer”, fontSize: “0.9rem”,
+display: “flex”, alignItems: “center”, justifyContent: “center”,
+}}>✕</button>
+</div>
+<div style={{ padding: “1.25rem” }}>
+{mobile ? (
+<div style={{ marginBottom: “1rem”, padding: “0.65rem 0.75rem”,
+background: “rgba(0,255,65,0.06)”, border: “1px solid rgba(0,255,65,0.2)”,
+fontFamily: “‘Share Tech Mono’, monospace”, fontSize: “0.7rem”, color: “#00B32C”, lineHeight: 1.8 }}>
+> MOBILE DETECTED<br />
+> TAP WALLET → PAGE OPENS INSIDE APP<br />
+> THEN TAP CONNECT AGAIN TO APPROVE
+</div>
+) : (
+<div style={{ fontFamily: “‘Share Tech Mono’, monospace”, fontSize: “0.72rem”, color: “#00B32C”, marginBottom: “1rem” }}>
+> SELECT YOUR WALLET TO AUTHORIZE
+</div>
+)}
+<div style={{ display: “flex”, flexDirection: “column”, gap: “0.75rem” }}>
+{WALLETS.map(w => (
+<button key={w.name} onClick={() => onSelect(w.name)} disabled={!!connecting}
+style={{
+background: “#080F08”, border: `1px solid ${connecting ? "rgba(0,255,65,0.15)" : "rgba(0,255,65,0.35)"}`,
+padding: “1rem 1.1rem”, display: “flex”, alignItems: “center”, gap: “0.9rem”,
+cursor: connecting ? “not-allowed” : “pointer”,
+fontFamily: “‘Share Tech Mono’, monospace”, color: “#00FF41”,
+width: “100%”, textAlign: “left”, minHeight: mobile ? 64 : “auto”,
+}}>
+<span style={{ fontSize: “1.5rem”, lineHeight: 1 }}>{w.emoji}</span>
+<div style={{ flex: 1 }}>
+<div style={{ fontFamily: “‘Press Start 2P’, monospace”, fontSize: “0.5rem”, color: w.color, marginBottom: “0.3rem” }}>{w.name}</div>
+<div style={{ fontSize: “0.65rem”, color: “#00B32C” }}>{w.hint}</div>
+</div>
+{connecting === w.name
+? <span style={{ fontFamily: “‘Press Start 2P’, monospace”, fontSize: “0.38rem”, color: “#FFE600”, animation: “blink 0.6s step-end infinite” }}>
+{mobile ? “OPENING…” : “WAITING…”}
+</span>
+: <span style={{ color: “#00B32C”, fontSize: “1rem” }}>→</span>
+}
+</button>
+))}
+</div>
+{(status === “error” || status === “rejected”) && (
+<div style={{ marginTop: “1rem”, padding: “0.65rem 0.75rem”,
+background: “rgba(255,46,99,0.08)”, border: “1px solid rgba(255,46,99,0.3)”,
+fontFamily: “‘Share Tech Mono’, monospace”, fontSize: “0.72rem”, color: “#FF2E63” }}>
+> ERR: {errorMsg}
+</div>
+)}
+<div style={{ marginTop: “1rem”, fontFamily: “‘Share Tech Mono’, monospace”, fontSize: “0.62rem”, color: “rgba(0,179,44,0.45)”, lineHeight: 1.9 }}>
+{mobile ? “// Tap a wallet — your dApp reopens inside it” : “// Approval popup opens in your extension”}<br />
+// We never store private keys.
+</div>
+</div>
+</div>
+</div>
+);
+}
+
+function DegenMarketplace() {
+const [cart, setCart] = useState([]);
+const [cartOpen, setCartOpen] = useState(false);
+const [currency, setCurrency] = useState(“SOL”);
+const [showWalletModal, setShowWalletModal] = useState(false);
+const [addedId, setAddedId] = useState(null);
+const [checkoutStep, setCheckoutStep] = useState(null);
+const [txHash, setTxHash] = useState(””);
+const { wallet, connect, disconnect, shortAddr, isConnected } = useWallet();
+const [terminalLines, setTerminalLines] = useState([
+“> SOLMARKET_v2.DEGEN initialized…”,
+“> Loading Solana RPC endpoint… OK”,
+“> Connecting to Jupiter API… OK”,
+“> DEX feeds: LIVE”,
+]);
+const solPrice = 148.5;
+
+useEffect(() => {
+const msgs = [
+“> 0x4f2a purchased FULL.STACK bundle [2500 USDC]”,
+“> New Jupiter verification queued…”,
+“> Liquidity injection: +$42,000”,
+“> 0x8b1c purchased DEX.REACTIONS”,
+“> CMC listing submitted for review”,
+“> 0x3d9f connected wallet [Phantom]”,
+];
+let i = 0;
+const t = setInterval(() => {
+setTerminalLines(prev => […prev.slice(-6), msgs[i % msgs.length]]);
+i++;
+}, 3000);
+return () => clearInterval(t);
+}, []);
+
+const addToCart = (item) => {
+if (cart.find(c => c.id === item.id)) return;
+setCart(prev => […prev, item]);
+setAddedId(item.id);
+setTimeout(() => setAddedId(null), 1200);
+setCartOpen(true);
+};
+
+const removeFromCart = (id) => setCart(prev => prev.filter(c => c.id !== id));
+const total = cart.reduce((s, i) => s + i.price, 0);
+const totalSol = (total / solPrice).toFixed(2);
+
+const handleConnectWallet = async (walletName) => {
+await connect(walletName);
+};
+
+// Close wallet modal once connected
+useEffect(() => {
+if (isConnected) setShowWalletModal(false);
+}, [isConnected]);
+
+const handleCheckout = () => {
+if (!isConnected) { setShowWalletModal(true); return; }
+setCheckoutStep(“confirm”);
+};
+
+const handleApprove = () => {
+setCheckoutStep(“processing”);
+setTimeout(() => {
+setTxHash(“5K” + Math.random().toString(36).slice(2, 10).toUpperCase());
+setCheckoutStep(“success”);
+setCart([]);
+}, 2500);
+};
+
+return (
+<>
+<style>{`
+@import url(‘https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Press+Start+2P&display=swap’);
+
+```
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #00FF41;
+      --green-dim: #00B32C;
+      --green-dark: #003B0F;
+      --pink: #FF2E63;
+      --cyan: #00FFFF;
+      --yellow: #FFE600;
+      --orange: #FF6B35;
+      --bg: #000000;
+      --bg2: #040804;
+      --bg3: #080F08;
+      --mono: 'Share Tech Mono', monospace;
+      --pixel: 'Press Start 2P', monospace;
+      --border: rgba(0,255,65,0.2);
+      --border-bright: rgba(0,255,65,0.5);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--green); font-family: var(--mono);
+      overflow-x: hidden; cursor: crosshair;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--green-dim); border-radius: 3px; }
+
+    /* NAV */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg); border-bottom: 1px solid var(--border-bright);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem; height: 56px;
+    }
+    .nav-logo {
+      font-family: var(--pixel); font-size: 0.75rem; color: var(--green);
+      text-shadow: 0 0 10px var(--green), 0 0 20px var(--green-dim);
+      letter-spacing: 0.05em;
+    }
+    .nav-logo span { color: var(--pink); }
+    .nav-center {
+      display: flex; align-items: center; gap: 1.5rem;
+      font-size: 0.75rem; color: var(--green-dim);
+    }
+    .nav-stat { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; }
+    .nav-stat-val { color: var(--green); font-size: 0.8rem; }
+    .nav-stat-label { font-size: 0.55rem; color: var(--green-dim); text-transform: uppercase; }
+    .nav-right { display: flex; gap: 0.75rem; align-items: center; }
+
+    /* BUTTONS */
+    .btn {
+      font-family: var(--mono); font-size: 0.8rem; cursor: pointer;
+      padding: 0.5rem 1rem; border-radius: 0; text-transform: uppercase;
+      letter-spacing: 0.05em; transition: all 0.1s; border: none;
+    }
+    .btn-green {
+      background: var(--green); color: #000; font-weight: bold;
+      box-shadow: 0 0 12px rgba(0,255,65,0.4);
+    }
+    .btn-green:hover { box-shadow: 0 0 24px rgba(0,255,65,0.8); transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent; color: var(--green); border: 1px solid var(--border-bright);
+    }
+    .btn-ghost:hover { background: rgba(0,255,65,0.08); border-color: var(--green); }
+    .btn-pink {
+      background: var(--pink); color: #fff;
+      box-shadow: 0 0 12px rgba(255,46,99,0.4);
+    }
+    .btn-pink:hover { box-shadow: 0 0 24px rgba(255,46,99,0.8); }
+    .btn-cart {
+      position: relative; background: transparent; color: var(--green);
+      border: 1px solid var(--border-bright); padding: 0.45rem 0.9rem;
+      font-family: var(--mono); font-size: 0.8rem; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-cart:hover { border-color: var(--green); background: rgba(0,255,65,0.06); }
+    .cart-badge {
+      position: absolute; top: -6px; right: -6px;
+      background: var(--pink); color: #fff; font-size: 0.6rem; font-weight: bold;
+      width: 17px; height: 17px; border-radius: 0; display: flex; align-items: center; justify-content: center;
+    }
+
+    /* HERO */
+    .hero {
+      position: relative; min-height: 90vh; display: flex; align-items: center;
+      padding: 4rem 3rem; overflow: hidden;
+      border-bottom: 1px solid var(--border-bright);
+    }
+    .hero-grid { display: grid; grid-template-columns: 1fr 420px; gap: 3rem; align-items: center; width: 100%; max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+    .hero-eyebrow {
+      font-family: var(--pixel); font-size: 0.5rem; color: var(--pink);
+      letter-spacing: 0.15em; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .eyebrow-dot { width: 6px; height: 6px; background: var(--pink); animation: blink 0.8s step-end infinite; }
+    .hero h1 {
+      font-family: var(--pixel); font-size: clamp(1rem, 2.5vw, 1.6rem);
+      line-height: 1.8; letter-spacing: 0.02em; margin-bottom: 1.5rem;
+      text-shadow: 0 0 20px rgba(0,255,65,0.5);
+    }
+    .hero h1 .accent { color: var(--yellow); text-shadow: 0 0 15px rgba(255,230,0,0.5); }
+    .hero-sub {
+      font-size: 0.9rem; color: var(--green-dim); line-height: 1.8;
+      margin-bottom: 2rem; max-width: 520px; border-left: 2px solid var(--green-dim); padding-left: 1rem;
+    }
+    .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .hero-tag {
+      display: inline-block; font-family: var(--pixel); font-size: 0.45rem;
+      padding: 0.3rem 0.6rem; margin-bottom: 1rem;
+      background: rgba(255,230,0,0.1); border: 1px solid var(--yellow); color: var(--yellow);
+    }
+
+    /* TERMINAL */
+    .terminal {
+      background: var(--bg2); border: 1px solid var(--border-bright);
+      font-family: var(--mono); font-size: 0.75rem;
+      box-shadow: 0 0 30px rgba(0,255,65,0.15), inset 0 0 30px rgba(0,255,65,0.02);
+    }
+    .terminal-bar {
+      padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.4rem; background: var(--bg3);
+    }
+    .t-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .terminal-title { font-family: var(--pixel); font-size: 0.45rem; color: var(--green-dim); margin-left: 0.5rem; }
+    .terminal-body { padding: 1rem; min-height: 220px; display: flex; flex-direction: column; gap: 0.4rem; }
+    .terminal-line { color: var(--green-dim); }
+    .terminal-line.new { color: var(--green); animation: fadeIn 0.3s ease; }
+    .terminal-input { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.5rem; }
+    .t-prompt { color: var(--pink); }
+
+    /* SECTION */
+    .section { padding: 5rem 3rem; max-width: 1200px; margin: 0 auto; }
+    .section-header { margin-bottom: 3rem; }
+    .section-tag {
+      font-family: var(--pixel); font-size: 0.45rem; color: var(--pink);
+      letter-spacing: 0.15em; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .section-tag::before { content: '//'; color: var(--green-dim); }
+    .section-title {
+      font-family: var(--pixel); font-size: clamp(0.8rem, 2vw, 1.1rem);
+      line-height: 1.8; text-shadow: 0 0 15px rgba(0,255,65,0.3);
+    }
+    .section-divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+    /* BUNDLES */
+    .bundles-grid { display: grid; grid-template-columns: 1fr 1.08fr 1fr; gap: 1rem; }
+    .bundle-card {
+      border: 1px solid var(--border); background: var(--bg2); padding: 0;
+      position: relative; overflow: hidden; transition: border-color 0.15s, box-shadow 0.15s;
+      cursor: default;
+    }
+    .bundle-card:hover { border-color: var(--border-bright); box-shadow: 0 0 20px rgba(0,255,65,0.1); }
+    .bundle-card.highlight {
+      border-color: var(--green);
+      box-shadow: 0 0 40px rgba(0,255,65,0.2), inset 0 0 40px rgba(0,255,65,0.03);
+    }
+    .bundle-header {
+      padding: 1rem 1.25rem 0.75rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .bundle-tier { font-family: var(--pixel); font-size: 0.45rem; color: var(--green-dim); }
+    .bundle-emoji { font-size: 1.3rem; }
+    .bundle-body { padding: 1.25rem; }
+    .bundle-name { font-family: var(--pixel); font-size: 0.7rem; margin-bottom: 0.4rem; }
+    .bundle-sub { font-size: 0.72rem; color: var(--green-dim); margin-bottom: 1.25rem; letter-spacing: 0.05em; }
+    .bundle-tag {
+      display: inline-block; font-family: var(--pixel); font-size: 0.4rem;
+      padding: 0.25rem 0.5rem; margin-bottom: 1rem; border: 1px solid currentColor;
+    }
+    .bundle-features { list-style: none; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .bundle-features li {
+      font-size: 0.75rem; color: var(--green-dim); display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.3rem 0; border-bottom: 1px solid rgba(0,255,65,0.05);
+    }
+    .bundle-features li::before { content: '>'; color: var(--green); font-weight: bold; flex-shrink: 0; }
+    .bundle-price {
+      font-family: var(--pixel); font-size: clamp(1rem, 2vw, 1.3rem);
+      margin-bottom: 1.25rem;
+    }
+    .bundle-price .currency { font-size: 0.55rem; color: var(--green-dim); margin-right: 0.3rem; }
+    .bundle-price .usd { color: var(--green); }
+    .bundle-footer { padding: 0 1.25rem 1.25rem; }
+    .btn-bundle {
+      width: 100%; padding: 0.75rem; font-family: var(--pixel); font-size: 0.55rem;
+      cursor: pointer; border: none; letter-spacing: 0.05em; transition: all 0.1s;
+      text-transform: uppercase;
+    }
+    .btn-bundle-main { background: var(--green); color: #000; box-shadow: 0 0 20px rgba(0,255,65,0.3); }
+    .btn-bundle-main:hover { box-shadow: 0 0 40px rgba(0,255,65,0.6); }
+    .btn-bundle-ghost { background: transparent; color: var(--green); border: 1px solid var(--border-bright); }
+    .btn-bundle-ghost:hover { background: rgba(0,255,65,0.06); }
+    .btn-in-cart { background: rgba(0,255,65,0.1) !important; color: var(--green) !important; border: 1px solid var(--border-bright) !important; }
+    .highlight-corner {
+      position: absolute; top: 0; right: 0;
+      width: 0; height: 0;
+      border-left: 32px solid transparent;
+      border-top: 32px solid var(--green);
+    }
+
+    /* SERVICES */
+    .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+    .service-card {
+      background: var(--bg2); border: 1px solid var(--border); padding: 1.25rem;
+      transition: border-color 0.15s, background 0.15s; position: relative;
+    }
+    .service-card:hover { border-color: var(--border-bright); background: var(--bg3); }
+    .service-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.75rem; }
+    .service-icon-lg { font-size: 1.6rem; color: var(--green); }
+    .service-tag-pill {
+      font-family: var(--pixel); font-size: 0.4rem; padding: 0.2rem 0.4rem;
+      background: rgba(0,255,65,0.1); border: 1px solid var(--border-bright); color: var(--green);
+    }
+    .service-name { font-family: var(--pixel); font-size: 0.55rem; margin-bottom: 0.4rem; line-height: 1.6; }
+    .service-price { font-family: var(--pixel); font-size: 0.7rem; color: var(--yellow); margin-bottom: 1rem; }
+    .btn-add-svc {
+      width: 100%; padding: 0.5rem; font-family: var(--pixel); font-size: 0.45rem;
+      cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;
+      background: transparent; color: var(--green); border: 1px solid var(--border-bright);
+      transition: all 0.1s;
+    }
+    .btn-add-svc:hover { background: rgba(0,255,65,0.08); border-color: var(--green); }
+    .btn-add-svc.added { background: rgba(0,255,65,0.12); color: var(--green); border-color: var(--green); }
+
+    /* CART DRAWER */
+    .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .cart-overlay.open { opacity: 1; pointer-events: all; }
+    .cart-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 360px; z-index: 201;
+      background: var(--bg2); border-left: 1px solid var(--green);
+      transform: translateX(100%); transition: transform 0.25s ease;
+      display: flex; flex-direction: column;
+      box-shadow: -8px 0 40px rgba(0,255,65,0.15);
+    }
+    .cart-drawer.open { transform: translateX(0); }
+    .cart-head {
+      padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--bg3);
+    }
+    .cart-title { font-family: var(--pixel); font-size: 0.6rem; }
+    .cart-close {
+      background: transparent; border: 1px solid var(--border); color: var(--green-dim);
+      width: 28px; height: 28px; cursor: pointer; font-size: 0.85rem;
+      display: flex; align-items: center; justify-content: center; transition: color 0.15s;
+    }
+    .cart-close:hover { color: var(--green); border-color: var(--green); }
+    .cart-items { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.6rem; }
+    .cart-empty { padding: 3rem 1rem; text-align: center; color: var(--green-dim); font-size: 0.8rem; line-height: 2; }
+    .cart-item {
+      background: var(--bg3); border: 1px solid var(--border);
+      padding: 0.75rem; display: flex; align-items: center; gap: 0.75rem;
+    }
+    .cart-item-name { font-size: 0.75rem; margin-bottom: 0.2rem; }
+    .cart-item-price { font-family: var(--pixel); font-size: 0.5rem; color: var(--yellow); }
+    .cart-item-remove { background: none; border: none; color: var(--green-dim); cursor: pointer; font-size: 0.9rem; margin-left: auto; transition: color 0.1s; }
+    .cart-item-remove:hover { color: var(--pink); }
+    .cart-foot { padding: 1rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.75rem; }
+    .cart-total-row { display: flex; justify-content: space-between; align-items: baseline; }
+    .cart-total-label { font-size: 0.75rem; color: var(--green-dim); }
+    .cart-total-val { font-family: var(--pixel); font-size: 0.9rem; color: var(--green); }
+    .currency-switch { display: flex; }
+    .currency-opt {
+      flex: 1; padding: 0.4rem; font-family: var(--pixel); font-size: 0.45rem;
+      cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--green-dim);
+      transition: all 0.1s;
+    }
+    .currency-opt.active { background: var(--green); color: #000; border-color: var(--green); }
+    .btn-checkout-main {
+      width: 100%; padding: 0.85rem; font-family: var(--pixel); font-size: 0.6rem;
+      cursor: pointer; border: none; background: var(--green); color: #000;
+      letter-spacing: 0.05em; box-shadow: 0 0 20px rgba(0,255,65,0.35);
+      transition: box-shadow 0.15s;
+    }
+    .btn-checkout-main:hover { box-shadow: 0 0 40px rgba(0,255,65,0.65); }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 400;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-box {
+      background: var(--bg2); border: 1px solid var(--green);
+      width: 420px; max-width: 90vw;
+      box-shadow: 0 0 60px rgba(0,255,65,0.25);
+    }
+    .modal-top {
+      padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--bg3);
+    }
+    .modal-title { font-family: var(--pixel); font-size: 0.6rem; }
+    .modal-body { padding: 1.5rem; }
+
+    /* CONFIRM MODAL */
+    .confirm-items { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.25rem; }
+    .confirm-item {
+      display: flex; justify-content: space-between; font-size: 0.78rem;
+      padding: 0.5rem 0.6rem; background: var(--bg3); border: 1px solid var(--border);
+    }
+    .confirm-total { display: flex; justify-content: space-between; padding: 0.75rem 0; border-top: 1px solid var(--border-bright); margin-bottom: 1.25rem; }
+    .confirm-total-label { font-size: 0.78rem; color: var(--green-dim); }
+    .confirm-total-val { font-family: var(--pixel); font-size: 0.75rem; color: var(--green); }
+    .confirm-actions { display: flex; gap: 0.75rem; }
+
+    /* SUCCESS */
+    .success-box { text-align: center; padding: 0.5rem; }
+    .success-ascii {
+      font-family: var(--pixel); font-size: 0.55rem; color: var(--green); line-height: 2;
+      margin-bottom: 1.25rem; text-shadow: 0 0 15px rgba(0,255,65,0.6);
+    }
+    .success-title { font-family: var(--pixel); font-size: 0.7rem; margin-bottom: 0.75rem; color: var(--green); }
+    .tx-box { background: var(--bg3); border: 1px solid var(--border); padding: 0.75rem; margin-bottom: 1.25rem; text-align: left; }
+    .tx-label-sm { font-size: 0.65rem; color: var(--green-dim); margin-bottom: 0.25rem; }
+    .tx-val-sm { font-family: var(--pixel); font-size: 0.45rem; color: var(--cyan); word-break: break-all; }
+
+    /* PROCESSING */
+    .processing-box { text-align: center; padding: 0.5rem; }
+    .processing-art { font-family: var(--pixel); font-size: 0.5rem; color: var(--green); line-height: 2; margin-bottom: 1rem; animation: flicker 1.5s ease-in-out infinite; }
+    .processing-bar { height: 6px; background: var(--bg3); border: 1px solid var(--border); margin-bottom: 0.75rem; overflow: hidden; }
+    .processing-fill { height: 100%; background: var(--green); animation: loadBar 2.5s ease-out forwards; }
+    .processing-sub { font-size: 0.75rem; color: var(--green-dim); }
+
+    /* FOOTER */
+    .footer {
+      border-top: 1px solid var(--border); padding: 2rem 3rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;
+    }
+    .footer-logo { font-family: var(--pixel); font-size: 0.6rem; text-shadow: 0 0 10px var(--green); }
+    .footer-logo span { color: var(--pink); }
+    .footer-disclaimer { font-size: 0.7rem; color: var(--green-dim); max-width: 500px; line-height: 1.8; }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes tickerScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    @keyframes flicker { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    @keyframes loadBar { from{width:0} to{width:100%} }
+    @keyframes scanline { 0%{transform:translateY(-100%)} 100%{transform:translateY(100vh)} }
+    @keyframes glowPulse { 0%,100%{box-shadow:0 0 20px rgba(0,255,65,0.2)} 50%{box-shadow:0 0 40px rgba(0,255,65,0.5)} }
+
+    .scanline-sweep {
+      position: fixed; top: 0; left: 0; right: 0; height: 60px; z-index: 9998;
+      background: linear-gradient(transparent, rgba(0,255,65,0.03), transparent);
+      animation: scanline 8s linear infinite; pointer-events: none;
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .bundles-grid { grid-template-columns: 1fr; }
+      .services-grid { grid-template-columns: repeat(2, 1fr); }
+      .section { padding: 3rem 1.25rem; }
+      .hero { padding: 3rem 1.5rem; }
+      .footer { flex-direction: column; padding: 1.5rem; }
+      .cart-drawer { width: 100%; }
+      .nav-center { display: none; }
+    }
+    @media (max-width: 520px) {
+      .services-grid { grid-template-columns: 1fr; }
+    }
+  `}</style>
+
+  <div className="scanline-sweep" />
+
+  {/* TICKER */}
+  <Ticker />
+
+  {/* NAV */}
+  <nav className="nav">
+    <div className="nav-logo">SOL<span>MARKET</span>.EXE</div>
+    <div className="nav-center">
+      <div className="nav-stat">
+        <div className="nav-stat-val">$<LiveCounter value={284120} /></div>
+        <div className="nav-stat-label">Volume 24H</div>
+      </div>
+      <div style={{ color: "var(--border)", fontSize: "0.8rem" }}>|</div>
+      <div className="nav-stat">
+        <div className="nav-stat-val"><LiveCounter value={1847} /></div>
+        <div className="nav-stat-label">Orders Filled</div>
+      </div>
+      <div style={{ color: "var(--border)", fontSize: "0.8rem" }}>|</div>
+      <div className="nav-stat">
+        <div className="nav-stat-val" style={{ color: "var(--green)", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+          <span style={{ animation: "blink 1s step-end infinite" }}>●</span> LIVE
+        </div>
+        <div className="nav-stat-label">Network</div>
+      </div>
+    </div>
+    <div className="nav-right">
+      <button className="btn-cart" onClick={() => setCartOpen(true)}>
+        [BAG{cart.length > 0 ? ` +${cart.length}` : ""}]
+        {cart.length > 0 && <div className="cart-badge">{cart.length}</div>}
+      </button>
+      {isConnected
+        ? <div style={{ fontFamily: "var(--mono)", fontSize: "0.75rem", color: "var(--green)", border: "1px solid var(--border-bright)", padding: "0.45rem 0.8rem", display: "flex", gap: "0.5rem", alignItems: "center", cursor: "pointer" }}
+            onClick={disconnect} title="Click to disconnect">
+            <span style={{ animation: "blink 1.5s step-end infinite" }}>●</span>
+            {wallet.name} {shortAddr}
+          </div>
+        : wallet.status === "connecting"
+          ? <div style={{ fontFamily: "var(--mono)", fontSize: "0.75rem", color: "var(--yellow)", border: "1px solid rgba(255,230,0,0.4)", padding: "0.45rem 0.8rem", display: "flex", gap: "0.4rem", alignItems: "center" }}>
+              <span style={{ animation: "blink 0.5s step-end infinite" }}>◈</span> APPROVING...
+            </div>
+          : <button className="btn btn-green" onClick={() => setShowWalletModal(true)}>CONNECT_WALLET</button>
+      }
+    </div>
+  </nav>
+
+  {/* HERO */}
+  <section className="hero">
+    <MatrixRain />
+    <div className="hero-grid">
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div className="hero-eyebrow">
+          <div className="eyebrow-dot" />
+          SOLANA NATIVE // NO APPLICATIONS // NO WAITING
+        </div>
+        <div className="hero-tag">DEGEN BUILD TOOLS</div>
+        <h1>
+          <GlitchText size="inherit">ON-CHAIN GROWTH</GlitchText><br />
+          TOOLS FOR <span className="accent">SOLANA</span><br />
+          PROJECTS<Cursor />
+        </h1>
+        <p className="hero-sub">
+          Browse, pay, and activate Solana-native services instantly.<br />
+          No applications. No waiting. No bullshit.
+        </p>
+        <div className="hero-buttons">
+          <button className="btn btn-green" style={{ fontSize: "0.85rem", padding: "0.7rem 1.5rem" }} onClick={() => isConnected ? disconnect() : setShowWalletModal(true)}>
+            {isConnected ? `✓ ${wallet.name?.toUpperCase()} ${shortAddr}` : "CONNECT_WALLET()"}
+          </button>
+          <button className="btn btn-ghost" style={{ padding: "0.7rem 1.5rem" }} onClick={() => document.getElementById("bundles")?.scrollIntoView({ behavior: "smooth" })}>
+            VIEW_MARKETPLACE →
+          </button>
+        </div>
+        <div style={{ marginTop: "2rem", display: "flex", gap: "1.5rem", fontSize: "0.75rem", color: "var(--green-dim)" }}>
+          {["NO FORMS", "NO APPROVALS", "ON-CHAIN TX"].map(t => (
+            <span key={t} style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+              <span style={{ color: "var(--green)" }}>✓</span>{t}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* TERMINAL */}
+      <div className="terminal" style={{ position: "relative", zIndex: 1, animation: "glowPulse 4s ease-in-out infinite" }}>
+        <div className="terminal-bar">
+          <div className="t-dot" style={{ background: "var(--pink)" }} />
+          <div className="t-dot" style={{ background: "var(--yellow)" }} />
+          <div className="t-dot" style={{ background: "var(--green)" }} />
+          <div className="terminal-title">SOLMARKET_FEED.SH</div>
+        </div>
+        <div className="terminal-body">
+          {terminalLines.map((line, i) => (
+            <div key={i} className={`terminal-line ${i === terminalLines.length - 1 ? "new" : ""}`}>{line}</div>
+          ))}
+          <div className="terminal-input">
+            <span className="t-prompt">root@solmarket:~$</span>
+            <Cursor />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr className="section-divider" />
+
+  {/* BUNDLES */}
+  <div className="section" id="bundles">
+    <div className="section-header">
+      <div className="section-tag">BUNDLES.JSON</div>
+      <h2 className="section-title">CHOOSE YOUR TIER<Cursor /></h2>
+    </div>
+    <div className="bundles-grid">
+      {BUNDLES.map(b => {
+        const isAdded = !!cart.find(c => c.id === b.id);
+        const justAdded = addedId === b.id;
+        return (
+          <div key={b.id} className={`bundle-card ${b.highlight ? "highlight" : ""}`}>
+            {b.highlight && <div className="highlight-corner" />}
+            <div className="bundle-header">
+              <span className="bundle-tier">{b.tier}</span>
+              <span className="bundle-emoji">{b.emoji}</span>
+            </div>
+            <div className="bundle-body">
+              <div className="bundle-name">
+                <GlitchText color={b.highlight ? "var(--green)" : "var(--green)"}>{b.name}</GlitchText>
+              </div>
+              <div className="bundle-sub">{b.sub}</div>
+              <div className="bundle-tag" style={{ color: b.tagColor, borderColor: b.tagColor, background: `${b.tagColor}11` }}>
+                {b.tag}
+              </div>
+              <ul className="bundle-features">
+                {b.features.map((f, i) => <li key={i}>{f}</li>)}
+              </ul>
+              <div className="bundle-price">
+                <span className="currency">USD</span>
+                <span className="usd">${b.price.toLocaleString()}</span>
+              </div>
+            </div>
+            <div className="bundle-footer">
+              <button
+                className={`btn-bundle ${b.highlight ? "btn-bundle-main" : "btn-bundle-ghost"} ${isAdded ? "btn-in-cart" : ""}`}
+                onClick={() => !isAdded && addToCart(b)}
+              >
+                {isAdded ? "✓ IN BAG" : b.cta + " →"}
+              </button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+
+  <hr className="section-divider" />
+
+  {/* A LA CARTE */}
+  <div className="section" id="services">
+    <div className="section-header">
+      <div className="section-tag">SERVICES.LIST</div>
+      <h2 className="section-title">À-LA-CARTE<Cursor /></h2>
+    </div>
+    <div className="services-grid">
+      {SERVICES.map(s => {
+        const isAdded = !!cart.find(c => c.id === s.id);
+        return (
+          <div key={s.id} className="service-card">
+            <div className="service-card-top">
+              <div className="service-icon-lg">{s.icon}</div>
+              <div className="service-tag-pill">{s.tag}</div>
+            </div>
+            <div className="service-name">{s.name}</div>
+            <div className="service-price">${s.price}</div>
+            <button
+              className={`btn-add-svc ${isAdded ? "added" : ""}`}
+              onClick={() => !isAdded && addToCart(s)}
+            >
+              {isAdded ? "✓ IN BAG" : "+ ADD_TO_BAG"}
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+
+  {/* FOOTER */}
+  <footer className="footer">
+    <div className="footer-logo">SOL<span>MARKET</span>.EXE</div>
+    <p className="footer-disclaimer">
+      // Services are provided as preparation, guidance, and support.<br />
+      // Final listings and verifications are subject to third-party approval.
+    </p>
+    <div style={{ fontSize: "0.7rem", color: "var(--green-dim)", textAlign: "right" }}>
+      <div><span style={{ color: "var(--green)" }}>STATUS:</span> OPERATIONAL</div>
+      <div>NETWORK: SOLANA MAINNET</div>
+    </div>
+  </footer>
+
+  {/* CART OVERLAY */}
+  <div className={`cart-overlay ${cartOpen ? "open" : ""}`} onClick={() => setCartOpen(false)} />
+  <div className={`cart-drawer ${cartOpen ? "open" : ""}`}>
+    <div className="cart-head">
+      <div className="cart-title">YOUR_BAG.JSON {cart.length > 0 && `[${cart.length}]`}</div>
+      <button className="cart-close" onClick={() => setCartOpen(false)}>✕</button>
+    </div>
+    <div className="cart-items">
+      {cart.length === 0
+        ? <div className="cart-empty">
+            <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>📭</div>
+            &gt; BAG IS EMPTY<br />
+            &gt; ADD SERVICES TO PROCEED<br />
+            &gt; NGMI WITH AN EMPTY BAG
+          </div>
+        : cart.map(item => (
+          <div key={item.id} className="cart-item">
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="cart-item-name">{item.name || item.id.toUpperCase()}</div>
+              <div className="cart-item-price">${item.price}</div>
+            </div>
+            <button className="cart-item-remove" onClick={() => removeFromCart(item.id)}>✕</button>
+          </div>
+        ))
+      }
+    </div>
+    {cart.length > 0 && (
+      <div className="cart-foot">
+        <div className="cart-total-row">
+          <span className="cart-total-label">TOTAL:</span>
+          <span className="cart-total-val">
+            {currency === "SOL" ? `${totalSol} SOL` : `$${total.toLocaleString()} USDC`}
+          </span>
+        </div>
+        <div>
+          <div style={{ fontSize: "0.65rem", color: "var(--green-dim)", marginBottom: "0.4rem" }}>PAY_WITH:</div>
+          <div className="currency-switch">
+            <button className={`currency-opt ${currency === "USDC" ? "active" : ""}`} onClick={() => setCurrency("USDC")}>USDC</button>
+            <button className={`currency-opt ${currency === "SOL" ? "active" : ""}`} onClick={() => setCurrency("SOL")}>SOL</button>
+          </div>
+        </div>
+        <button className="btn-checkout-main" onClick={handleCheckout}>
+          🟢 CHECKOUT_WITH_WALLET()
+        </button>
+      </div>
+    )}
+  </div>
+
+  {/* CHECKOUT MODAL */}
+  {checkoutStep === "confirm" && (
+    <div className="modal-overlay">
+      <div className="modal-box">
+        <div className="modal-top">
+          <div className="modal-title">CONFIRM_ORDER.EXE</div>
+          <button className="cart-close" onClick={() => setCheckoutStep(null)}>✕</button>
+        </div>
+        <div className="modal-body">
+          <div className="confirm-items">
+            {cart.map(item => (
+              <div key={item.id} className="confirm-item">
+                <span>{item.name || item.id.toUpperCase()}</span>
+                <span style={{ fontFamily: "var(--pixel)", fontSize: "0.5rem", color: "var(--yellow)" }}>${item.price}</span>
+              </div>
+            ))}
+          </div>
+          <div className="confirm-total">
+            <span className="confirm-total-label">TOTAL DUE:</span>
+            <span className="confirm-total-val">{currency === "SOL" ? `${totalSol} SOL` : `$${total.toLocaleString()} USDC`}</span>
+          </div>
+          <div className="confirm-actions">
+            <button className="btn btn-ghost" style={{ flex: 1, padding: "0.65rem" }} onClick={() => setCheckoutStep(null)}>CANCEL</button>
+            <button className="btn btn-green" style={{ flex: 2, padding: "0.65rem" }} onClick={handleApprove}>APPROVE_TX →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {checkoutStep === "processing" && (
+    <div className="modal-overlay">
+      <div className="modal-box">
+        <div className="modal-top"><div className="modal-title">BROADCASTING...</div></div>
+        <div className="modal-body">
+          <div className="processing-box">
+            <div className="processing-art">
+              &gt; SIGNING_TX...<br />
+              &gt; SENDING_TO_NETWORK...<br />
+              &gt; AWAITING_CONFIRMATION...
+            </div>
+            <div className="processing-bar"><div className="processing-fill" /></div>
+            <div className="processing-sub">&gt; DO NOT CLOSE THIS WINDOW</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {checkoutStep === "success" && (
+    <div className="modal-overlay">
+      <div className="modal-box">
+        <div className="modal-top">
+          <div className="modal-title" style={{ color: "var(--green)" }}>TX_CONFIRMED ✓</div>
+          <button className="cart-close" onClick={() => { setCheckoutStep(null); setCartOpen(false); }}>✕</button>
+        </div>
+        <div className="modal-body">
+          <div className="success-box">
+            <div className="success-ascii">
+              ██████╗ ███████╗<br />
+              ██╔════╝ ██╔════╝<br />
+              ██║  ███╗█████╗<br />
+              ██║   ██║██╔══╝<br />
+              ╚██████╔╝███████╗<br />
+              ╚═════╝ ╚══════╝
+            </div>
+            <div className="success-title">TRANSACTION CONFIRMED</div>
+            <div className="tx-box">
+              <div className="tx-label-sm">TX_HASH:</div>
+              <div className="tx-val-sm">{txHash}</div>
+            </div>
+            <div style={{ fontSize: "0.75rem", color: "var(--green-dim)", marginBottom: "1.25rem", lineHeight: "1.8" }}>
+              &gt; Services activating...<br />
+              &gt; Dashboard ready
+            </div>
+            <button className="btn btn-green" style={{ width: "100%", padding: "0.75rem" }}
+              onClick={() => { setCheckoutStep(null); setCartOpen(false); }}>
+              VIEW_DASHBOARD →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* WALLET SELECT MODAL */}
+  {showWalletModal && (
+    <WalletModal
+      onSelect={handleConnectWallet}
+      onClose={() => {
+        if (wallet.status !== "connecting") setShowWalletModal(false);
+      }}
+      status={wallet.status}
+      errorMsg={wallet.errorMsg}
+      connecting={wallet.status === "connecting" ? wallet.name : null}
+    />
+  )}
+</>
+```
+
+);
+}
+
+```
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<DegenMarketplace />);
+```
+
+  </script>
+</body>
+</html>
